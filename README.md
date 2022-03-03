@@ -1,17 +1,17 @@
-# Python Fluctuation Filter Module
+# Fluctuation Filter Module
 
 
 |              |                                                            |
 | ------------ | ---------------------------------------------------------- |
-| name         | Python Fluctuation Filter                       |
+| name         | Fluctuation Filter                                         |
 | version      | v0.0.2                                                     |
-| docker image | [weevenetwork/weeve-fluctuation-filter](https://linktodockerhub/) |
+| docker image | [weevenetwork/weeve-fluctuation-filter](https://hub.docker.com/r/weevenetwork/weeve-fluctuation-filter) |
 | tags         | Python, Flask, Docker, Weeve                               |
 | authors      | Mithila Ghuge                                                |
 
 ***
 ## Table of Content
-- [Python Fluctuation Filter](https://#python-processing-module-boilerplate)
+- [Fluctuation Filter Module](#fluctuation-filter-module)
   - [Table of Content](#table-of-content)
   - [Description](#description)
   - [Features](#features)
@@ -19,8 +19,9 @@
     - [Module Specific](#module-specific)
     - [Set by the weeve Agent on the edge-node](#set-by-the-weeve-agent-on-the-edge-node)
   - [Dependencies](#dependencies)
-  - [Input/Ingress](#inputingress)
+  - [Input](#input)
   - [Output/Egress](#outputegress)
+    - [Example](#example)
   - [Docker Compose Example](#docker-compose-example)
 ***
 
@@ -28,11 +29,12 @@
 
 This is a Python Fluctuation Filter module and it is used to eliminate unwanted spikes from input data and provide stable output.
 It will delay the change of the value filtering out specific amount (instances) of different, non-persisting value.
-Navigate to [As a module developer](#as-a-module-developer) to learn how to use this module.
+
 
 ## Features
 1. Flask ReST client
 2. Request - sends HTTP Request to the next module
+3. Filtering unstable data and providing stable output
 
 ## Environment Variables
 
@@ -56,13 +58,9 @@ Other features required for establishing the inter-container communication betwe
 | --------------------- | ------ | ------------------------------------------------- |
 | MODULE_NAME           | string | Name of the module                                |
 | MODULE_TYPE           | string | Type of the module (ingress, processing, egress)  |
-| EGRESS_SCHEME         | string | URL Scheme                                        |
-| EGRESS_HOST           | string | URL target host                                   |
-| EGRESS_PORT           | string | URL target port                                   |
-| EGRESS_PATH           | string | URL target path                                   |
-| EGRESS_URL            | string | HTTP ReST endpoint for the next module            |
-
-
+| INGRESS_HOST          | string | URL local host                                    |
+| INGRESS_PORT          | string | URL local port                                    |
+| INGRESS_PATH          | string | URL local path                                    |
 
 ## Dependencies
 
@@ -72,14 +70,28 @@ Other features required for establishing the inter-container communication betwe
 
 ## Input
 
-Input to this module is JSON body single object:
+Input to this module is JSON body single object or array of objects:
 
-Example of single object:
+Example:
 
 ```node
 {
   temperature: 15,
 }
+```
+
+```node
+[
+  {
+    temperature: 15,
+  },
+  {
+    temperature: 21,
+  },
+  {
+    temperature: 25,
+  },
+];
 ```
 
 ## Output/Egress
@@ -115,9 +127,9 @@ Expected Output :(x,x,x,x,24,24,24,24,21,21,21,21,21,25)
 version: "3"
 services:
   fluctuation_filter:
-    image: weevenetwork/weeve-filter
+    image: weevenetwork/weeve-fluctuation-filter
     environment:
-      MODULE_NAME: fluctuation-filter
+      MODULE_NAME: weeve-fluctuation-filter
       MODULE_TYPE: PROCESS
       WINDOW_SIZE: 3
       SEND_ON_CHANGE: False
