@@ -1,53 +1,52 @@
-# Python Processing Module Boilerplate
+# Fluctuation Filter Module
 
 
 |              |                                                            |
 | ------------ | ---------------------------------------------------------- |
-| name         | Python Processing Module Boilerplate                       |
+| name         | Fluctuation Filter                                         |
 | version      | v0.0.2                                                     |
-| docker image | [weevenetwork/weeve-boilerplate](https://linktodockerhub/) |
+| docker image | [weevenetwork/weeve-fluctuation-filter](https://hub.docker.com/r/weevenetwork/weeve-fluctuation-filter) |
 | tags         | Python, Flask, Docker, Weeve                               |
-| authors      | Sanyam Arya                                                |
+| authors      | Mithila Ghuge                                                |
 
 ***
 ## Table of Content
-- [Python Processing Module Boilerplate](#python-processing-module-boilerplate)
+- [Fluctuation Filter Module](#fluctuation-filter-module)
   - [Table of Content](#table-of-content)
   - [Description](#description)
-    - [Features](#features)
+  - [Features](#features)
   - [Environment Variables](#environment-variables)
     - [Module Specific](#module-specific)
     - [Set by the weeve Agent on the edge-node](#set-by-the-weeve-agent-on-the-edge-node)
-  - [Directory Structure](#directory-structure)
-    - [File Tree](#file-tree)
-  - [As a module developer](#as-a-module-developer)
-    - [Configuration](#configuration)
-    - [Business Logic](#business-logic)
   - [Dependencies](#dependencies)
+  - [Input](#input)
   - [Output/Egress](#outputegress)
-- [VSCode Support for devcontainer](#vscode-support-for-devcontainer)
-
+    - [Example](#example)
+  - [Docker Compose Example](#docker-compose-example)
 ***
 
 ## Description 
 
-This is a Python Processing Boilerplate module and it serves as a starting point for developers to build process modules for weeve platform and data services.
-Navigate to [As a module developer](#as-a-module-developer) to learn how to use this module.
+This is a Python Fluctuation Filter module and it is used to eliminate unwanted spikes from input data and provide stable output.
+It will delay the change of the value filtering out specific amount (instances) of different, non-persisting value.
 
-### Features
+
+## Features
 1. Flask ReST client
 2. Request - sends HTTP Request to the next module
+3. Filtering unstable data and providing stable output
 
 ## Environment Variables
 
 ### Module Specific
 The following module configurations can be provided in a data service designer section on weeve platform:
 
-| Name         | Environment Variables | type   | Description                                  |
-| ------------ | --------------------- | ------ | -------------------------------------------- |
-| Input Label  | INPUT_LABEL           | string | The input label on which anomaly is detected |
-| Output Label | OUTPUT_LABEL          | string | The output label as which data is dispatched |
-| Output Unit  | OUTPUT_UNIT           | string | The output unit in which data is dispatched  |
+| Name           | Environment Variables | type    | Description                                           |
+| ------------   | --------------------- | ------  | ----------------------------------------------------- |
+| Input Label    | INPUT_LABEL           | string  | The input label on which anomaly is detected          |
+| Output Label   | OUTPUT_LABEL          | string  | The output label as which data is dispatched          |
+| Window Size    | WINDOW_SIZE           | integer | The stable instance count which need to be consider   |
+| Send on change | SEND_ON_CHANGE        | boolean | Set true to Output data only when stable value changes|
 
 ***
 
@@ -59,108 +58,9 @@ Other features required for establishing the inter-container communication betwe
 | --------------------- | ------ | ------------------------------------------------- |
 | MODULE_NAME           | string | Name of the module                                |
 | MODULE_TYPE           | string | Type of the module (ingress, processing, egress)  |
-| EGRESS_SCHEME         | string | URL Scheme                                        |
-| EGRESS_HOST           | string | URL target host                                   |
-| EGRESS_PORT           | string | URL target port                                   |
-| EGRESS_PATH           | string | URL target path                                   |
-| EGRESS_URL            | string | HTTP ReST endpoint for the next module            |
-
-
-> Node: For testing all the the environment overrides can be added to the `config.env` file.
-
-## Directory Structure
-
-Most important resources:
-
-| name              | description                                                                                            |
-| ----------------- | ------------------------------------------------------------------------------------------------------ |
-| image             | All resources related to Docker image (Dockerfile, entrypoint.sh, source code, requirements.txt)       |
-| image/src/main.py | Entry-point for the module                                                                             |
-| image/src/app     | The application directory                                                                              |
-| config.env        | Environment variables for running the module                                                           |
-| deploy.env        | Environment variables for deploying the module to Dockerhub                                            |
-| Module.yaml       | Module's YAML file that is later used by weeve platform Data Service Designer                          |
-
-### File Tree
-
-```bash
-
-├── image
-│   ├── src
-│   │   ├── app
-│   │   │   ├── __init__.py
-│   │   │   ├── config
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── application.py # Application/module specific configurations
-│   │   │   │   ├── http_codes.py # HTTP Status codes
-│   │   │   │   ├── log.py # log configuration
-│   │   │   │   └── weeve.py # Weeve agent specific configurations
-│   │   │   ├── module
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── main.py # [*] Main logic for the module
-│   │   │   │   └── validation.py # [*] Validation logic for incoming data
-│   │   │   ├── utils # Utility methods added here
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── booleanenv.py
-│   │   │   │   ├── env.py
-│   │   │   │   └── floatenv.py
-│   │   │   └── weeve # THe weeve logic
-│   │   │       ├── __init__.py
-│   │   │       ├── controllers.py
-│   │   │       ├── egress.py # Egress data to the next module
-│   │   │       └── health.py
-│   │   └── main.py
-│   ├── Dockerfile
-│   ├── entrypoint.sh
-│   └── requirements.txt
-├── config.env # Config environment variables for the module
-├── deploy.env # Environment variables for deploying the module to Dockerhub
-├── docker-compose.yml
-├── makefile
-├── Module.yaml # Used by weeve platform to generate resource in Data Service Designer section
-└── README.md
-
-```
-
-## As a module developer
-
-A module developer needs to add all the configuration and business logic.
-### Configuration
-
-* All the environment variables and global constants can be declared in the config package in the `image/src/app/config/application.py` file.
-* It uses the utils to get values from the environment and are recommended to the developer to use.
-  * env - Returns the value for the `ENVIRONMENT_VARIABLE` or the `default value`
-  * boolenv - Returns the boolean value for the `ENVIRONMENT_VARIABLE` or `false`
-  * floatenv - Returns the float value for the `ENVIRONMENT_VARIABLE` or `0.0`
-
-
-```python
-    APPLICATION = {
-        "INPUT_LABEL": env("INPUT_LABEL", "temperature"),
-        "OUTPUT_LABEL": env("OUTPUT_LABEL", "temperature"),
-        "OUTPUT_UNIT": env("OUTPUT_UNIT", "Celsius"),
-    }
- ``` 
-
-### Business Logic
-All the module logic can be written in the module package in image/src directory.
-   * The files can me modified for the module
-      1. `module/validation.py`
-         * The function `data_validation` takes the JSON data from the previous module.
-         * Incoming data can be validated here.
-         * Checks if data is of type `dict` or `list`.
-         * Checks if data contains required fields.
-         * Validation Errors can be send back to the HTTP REST client.
-         * Returns `[ data , error ]`
-      2. `module/main.py`
-         * The function `module_main` takes the output of the validation function as an argument.
-         * All the business logic about modules are written here
-         * Returns `[ data , error ]`
-      3. `weeve/egress`
-         * The function `send_data` takes the output of the main logic as an argument.
-         * Responsible for sending the data to the next module
-         * *It is not advisable to change it, but can be easily modified by altering the `send_data` function*
-
+| INGRESS_HOST          | string | URL local host                                    |
+| INGRESS_PORT          | string | URL local port                                    |
+| INGRESS_PATH          | string | URL local path                                    |
 
 ## Dependencies
 
@@ -168,32 +68,77 @@ All the module logic can be written in the module package in image/src directory
 * requests
 * python-dotenv
 
+## Input
+
+Input to this module is JSON body single object or array of objects:
+
+Example:
+
+```node
+{
+  temperature: 15,
+}
+```
+
+```node
+[
+  {
+    temperature: 15,
+  },
+  {
+    temperature: 21,
+  },
+  {
+    temperature: 25,
+  },
+];
+```
+
 ## Output/Egress
 Output of this module is JSON body:
 
 ```node
 {
     "<OUTPUT_LABEL>": <Processed data>,
-    "output_unit": <OUTPUT_UNIT>,
     "<MODULE_NAME>Time": timestamp
 }
 ```
+### Example 
+
+```
+
+Input data : (23,23,24,24,24,22,21,21,21,23,24,25,25,25)
+Window_Size : 3
+Assume previous_stable_value = x
+
+If Send_on_change == True then 
+Expected Output : (24,21,25)
+
+If Send_on_change == False then
+Expected Output :(x,x,x,x,24,24,24,24,21,21,21,21,21,25)
+```
+
  
-* Here `OUTPUT_LABEL` and `OUTPUT_UNIT` are specified at the module creation and `Processed data` is data processed by Module Main function.
-* However this could be modified in `image/src/weeve/egress.py`
+* Here `OUTPUT_LABEL` are specified at the module creation and `Processed data` is data processed by Module Main function.
 
-* Modules return a 200 response for success, and 500 for error. No other return message is supported. 
+## Docker Compose Example
 
-
-# VSCode Support for devcontainer
-
-1. VSCode can use a `docker` containerized solution for local development. [Read More about devcontainers]("https://code.visualstudio.com/docs/remote/create-dev-container).
-1. `.devcontiner` directory has all the information about that.
-2. Installs all the dependencies from the `requirements.txt` file.
-3. Installed python packages:
-    * `rope` - Used by VS code to refactor code 
-    * `pylint` - for lint checks on python files
-4. It also contains a nodejs `package.json` file and nodejs installed on the dev container.
-     * It contains the npm script to run and watch the module code while development.
-     * It provides hot refolding using a nodejs package called `nodemon`.
-%. `npm run start` or simply `npm start` to run the dev server
+```yml
+version: "3"
+services:
+  fluctuation_filter:
+    image: weevenetwork/weeve-fluctuation-filter
+    environment:
+      MODULE_NAME: weeve-fluctuation-filter
+      MODULE_TYPE: PROCESS
+      WINDOW_SIZE: 3
+      SEND_ON_CHANGE: False
+      EGRESS_URL: https://hookb.in/r1YwjDyn7BHzWWJVK8Gq
+      INGRESS_HOST: 0.0.0.0
+      INGRESS_PORT: 80
+      INGRESS_PATH: /
+      INPUT_LABEL: "temperature"
+      OUTPUT_LABEL: "temp"
+    ports:
+      - 5000:80
+```
