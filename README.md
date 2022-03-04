@@ -76,20 +76,20 @@ Example:
 
 ```node
 {
-  temperature: 15,
+  "temperature": 15,
 }
 ```
 
 ```node
 [
   {
-    temperature: 15,
+    "temperature": 15,
   },
   {
-    temperature: 21,
+    "temperature": 21,
   },
   {
-    temperature: 25,
+    "temperature": 25,
   },
 ];
 ```
