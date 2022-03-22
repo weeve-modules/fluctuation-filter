@@ -28,17 +28,17 @@ def processing():
             
         if APPLICATION['SEND_ON_CHANGE']:
             if previous_window_data == None and stable_data != None:
-                send_data(stable_data)
+                send_data(stable_data[APPLICATION['INPUT_LABEL']])
                 previous_window_data = stable_data
                
             else:
                 if previous_window_data != stable_data:
-                    send_data(stable_data)
+                    send_data(stable_data[APPLICATION['INPUT_LABEL']])
                     previous_window_data = stable_data
         
         else:
             if stable_data != None:
-                send_data(stable_data)
+                send_data(stable_data[APPLICATION['INPUT_LABEL']])
         
         if len(window_data) > 0:
             window_data[:] = window_data[1:]
@@ -62,7 +62,7 @@ def module_main(data):
             for d in data:
                 window_data.append(d)
                 processing()
-
+        
         return None, None
     except Exception:
         return None, "Unable to perform the module logic"
