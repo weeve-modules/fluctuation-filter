@@ -1,9 +1,7 @@
 version: "3"
 services:
   boilerplate:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: weevenetwork/fluctuation-filter
     environment:
       MODULE_NAME: fluctuation-filter
       MODULE_TYPE: PROCESS
