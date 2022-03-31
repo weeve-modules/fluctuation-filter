@@ -12,7 +12,7 @@ def boolenv(name: str, default=False) -> bool:
         bool: [value of the ENVIRONMENT_VARIABLE]
     """
 
-    if name.lower() == 'true':
+    if os.getenv(name).lower() == 'true':
         return True
     else:
         return False
