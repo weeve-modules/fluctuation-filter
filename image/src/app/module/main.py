@@ -62,7 +62,7 @@ def module_main(data):
             for d in data:
                 window_data.append(d)
                 processing()
-
+        
         return None, None
     except Exception:
         return None, "Unable to perform the module logic"
