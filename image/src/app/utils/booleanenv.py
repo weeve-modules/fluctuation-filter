@@ -13,5 +13,7 @@ def boolenv(name: str, default=False) -> bool:
     """
 
     if os.getenv(name) == 'True': return True
+    elif os.getenv(name) == 'true': return True
     elif os.getenv(name) == 'False': return False
+    elif os.getenv(name) == 'false' : return False
     else: return default
