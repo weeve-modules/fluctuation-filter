@@ -4,65 +4,79 @@ Mostly only this file requires changes
 """
 
 from app.config import APPLICATION
-from app.weeve.egress import send_data
+#from app.weeve.egress import send_data
+from queue import Queue
+
+data_queue = Queue(maxsize = APPLICATION['WINDOW_SIZE'])
+last_stable_data = None
+
+def safely_add_data_to_queue(queue, data) -> None:
+    """
+    This function is called by the main function to add data to the queue.
+    :param queue: The queue to add the data to
+    :param data: The data to be added to the queue
+    """
+    if queue.full():
+        queue.get()
+    queue.put(data)
 
 
-window_data = []
-stable_data = None
-previous_window_data = None
+def empty_queue(queue) -> None:
+    """
+    Remove all elements from the queue
 
-def processing():
-    global window_data
-    global stable_data
-    global previous_window_data
+    :param queue: The queue to be emptied
+    """
+    while not queue.empty():
+        queue.get()
 
-    flag = True
-   
-    if len(window_data) == APPLICATION['WINDOW_SIZE']:
-        for index in range(len(window_data) - 1):
-            if window_data[index] != window_data[index + 1]:
-                flag = False
-        
-        if flag:
-            stable_data = window_data[-1]
-            
-        if APPLICATION['SEND_ON_CHANGE']:
-            if previous_window_data == None and stable_data != None:
-                send_data(stable_data[APPLICATION['INPUT_LABEL']])
-                previous_window_data = stable_data
-               
-            else:
-                if previous_window_data != stable_data:
-                    send_data(stable_data[APPLICATION['INPUT_LABEL']])
-                    previous_window_data = stable_data
-        
-        else:
-            if stable_data != None:
-                send_data(stable_data[APPLICATION['INPUT_LABEL']])
-        
-        if len(window_data) > 0:
-            window_data[:] = window_data[1:]
 
-def module_main(data):
+def is_stable_value(queue) -> bool:
+    """
+    Return True if all items in the queue are equal to the first item in the queue
+
+    :param queue: A queue of items
+    :return: True if the queue is stable, False otherwise.
+    """
+    return all(item == queue.queue[0] for item in queue.queue)
+
+
+def can_send_data(data) -> bool:
+    """
+    This function is called by the main function to check if the data should be sent to the next module.
+    if __SEND_ON_CHANGE__ is set to True and data is different form last data.
+    :param data: The data to be checked
+    :return: True if the data should be sent, False otherwise
+    """
+    return not APPLICATION['SEND_ON_CHANGE'] or (APPLICATION['SEND_ON_CHANGE'] and data != last_stable_data)
+
+
+def module_main(received_data):
     """implement module logic here
-
     Args:
         parsed_data ([JSON Object]): [Data received by the module and validated by data_validation function]
-
     Returns:
         [string, string]: [data, error]
     """
-    try:
-        global window_data
+    global data_queue, last_stable_data
 
-        if type(data) == dict:
-            window_data.append(data)
-            processing()
-        elif type(data) == list:
-            for d in data:
-                window_data.append(d)
-                processing()
-        
+    try:
+        if type(received_data) is dict:
+            safely_add_data_to_queue(
+                data_queue, received_data[APPLICATION['INPUT_LABEL']])
+        elif type(received_data) is list:
+            for item in received_data:
+                safely_add_data_to_queue(data_queue, item[APPLICATION['INPUT_LABEL']])
+
+        if data_queue.full():
+            if is_stable_value(data_queue):
+                if (can_send_data(data_queue.queue[0])):
+                    last_stable_data = data_queue.queue[0]
+                    empty_queue(data_queue)  
+                    return last_stable_data, None
+                else:
+                    data_queue.get()
+
         return None, None
-    except Exception:
-        return None, "Unable to perform the module logic"
+    except Exception as e:
+        return None, str(e)
