@@ -1,7 +1,7 @@
 version: "3"
 services:
-  boilerplate:
-    image: weevenetwork/weeve-fluctuation-filter
+  fluctuation-filter:
+    image: weevenetwork/fluctuation-filter
     environment:
       MODULE_NAME: fluctuation-filter
       MODULE_TYPE: PROCESS
