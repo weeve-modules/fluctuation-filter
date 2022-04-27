@@ -13,7 +13,7 @@ categories:
   - id: category
     name: Filter
 image:
-  name: weevenetwork/weeve-fluctuation-filter
+  name: weevenetwork/fluctuation-filter
   tag: latest
 environments:
   - key: INPUT_LABEL

@@ -5,7 +5,7 @@
 | ------------ | ---------------------------------------------------------- |
 | name         | Fluctuation Filter                                         |
 | version      | v0.0.2                                                     |
-| docker image | [weevenetwork/weeve-fluctuation-filter](https://hub.docker.com/r/weevenetwork/weeve-fluctuation-filter) |
+| docker image | [weevenetwork/fluctuation-filter](https://hub.docker.com/r/weevenetwork/fluctuation-filter) |
 | tags         | Python, Flask, Docker, Weeve                               |
 | authors      | Mithila Ghuge                                                |
 
@@ -64,7 +64,7 @@ Other features required for establishing the inter-container communication betwe
 
 ## Dependencies
 
-* Flask==1.1.1
+* Flask
 * requests
 * python-dotenv
 
@@ -127,9 +127,9 @@ Expected Output :(x,x,x,x,24,24,24,24,21,21,21,21,21,25)
 version: "3"
 services:
   fluctuation_filter:
-    image: weevenetwork/weeve-fluctuation-filter
+    image: weevenetwork/fluctuation-filter
     environment:
-      MODULE_NAME: weeve-fluctuation-filter
+      MODULE_NAME: fluctuation-filter
       MODULE_TYPE: PROCESS
       WINDOW_SIZE: 3
       SEND_ON_CHANGE: False
