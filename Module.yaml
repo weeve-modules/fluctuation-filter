@@ -1,4 +1,4 @@
-displayName: 'Fluctuation filter'       # Display name for the module that will be displayed in the UI.
+displayName: 'Fluctuation Filter'       # Display name for the module that will be displayed in the UI.
 moduleName: 'fluctuation-filter'        # Module name that will be used to reference the module, and uniquely identify the module and their versions.
 description: 'Providing stable data by filtering out spikes.'       # Module description that will be displayed in the UI.
 versionName: '1.0.0'                    # Module version name that will be used to reference the module version, and uniquely identify the module version with a common name.
@@ -9,35 +9,34 @@ type: 'Processing'      # Module type (Input, Processing, Output) that will be u
 image:
   name: 'weevenetwork/fluctuation-filter'     # Image name from the docker registry.
   tag: 'latest'                               # Image tag from the docker registry.
-  homepage: 'https://hub.docker.com/weevenetwork/fluctuation-filter'      # Image homepage from the docker registry.
-repository: 'https://github.com/weevennetwork/fluctuation-filter'     # Repository URL to source code.
+  homepage: 'https://hub.docker.com/r/weevenetwork/fluctuation-filter'      # Image homepage from the docker registry.
+repository: 'https://github.com/weeve-modules/fluctuation-filter'     # Repository URL to source code.
 envs:                                   # Array of environment variables that will be used to configure the module. Also used to show related fields on the UI.
   - name: Input Label                   # name of the field to be displayed on the UI.
     key: INPUT_LABEL                # key to set in the environment variables.
     description: The field to apply module logic on     # Description/helper text for the field.
     value: 'temperature'                         # Value to be set in the environment variables.
     type: 'text'                    # Type of the field. Possible values are: ['text', 'select', 'boolean', 'date', 'time', 'dateTime-local', 'number', 'multiple', 'CSV', 'file']
-    dependencies:                     # List of dependencies for the field. This field is only displayed if all the dependencies are met. If
-      - key:                          # key of the dependency
-        value:                        # value of the dependency
+    options: []                        # Options for the field if it is a select or multiple select. An array of string options
+    dependencies: []                    # List of dependencies for the field. This field is only displayed if all the dependencies are met. If
   - name: Window Size
     key: WINDOW_SIZE
     description: Number of stable data instances to consider
-    value: '3'
+    value: 3
     type: 'number'
-    dependencies:
-      - key:
-        value:
+    options: []                        # Options for the field if it is a select or multiple select. An array of string options
+    dependencies: []                    # List of dependencies for the field. This field is only displayed if all the dependencies are met. If
   - name: Send On Change
     key: SEND_ON_CHANGE
     description: Output data only when stable value changes.
-    value: 'True'
-    type: 'boolean'
-    dependencies:
-      - key:
-        value:
-ports:                                  # Array of ports that will be exposed by the module.
-mounts:
+    value: True
+    type: 'select'
+    options:
+      - True
+      - False
+    dependencies: []                    # List of dependencies for the field. This field is only displayed if all the dependencies are met. If
+ports: []                                 # Array of ports that will be exposed by the module.
+mounts: []
 tags:                                   # Array of tags.
   - 'Python'
   - 'Processing'
