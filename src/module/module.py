@@ -9,12 +9,12 @@ from logging import getLogger
 from queue import Queue
 from time import time
 from os import getenv
-from params import PARAM
+from .params import PARAMS
 
 
 log = getLogger("module")
 
-data_queue = Queue(maxsize = PARAM['WINDOW_SIZE'])
+data_queue = Queue(maxsize = PARAMS['WINDOW_SIZE'])
 last_stable_data = None
 
 def safely_add_data_to_queue(queue, data) -> None:
@@ -55,7 +55,7 @@ def can_send_data(data) -> bool:
     :param data: The data to be checked
     :return: True if the data should be sent, False otherwise
     """
-    return not PARAM['SEND_ON_CHANGE'] or (PARAM['SEND_ON_CHANGE'] and data != last_stable_data)
+    return not PARAMS['SEND_ON_CHANGE'] or (PARAMS['SEND_ON_CHANGE'] and data != last_stable_data)
 
 
 def module_main(received_data: any) -> [any, str]:
@@ -79,10 +79,10 @@ def module_main(received_data: any) -> [any, str]:
     try:
         if type(received_data) is dict:
             safely_add_data_to_queue(
-                data_queue, received_data[PARAM['INPUT_LABEL']])
+                data_queue, received_data[PARAMS['INPUT_LABEL']])
         elif type(received_data) is list:
             for item in received_data:
-                safely_add_data_to_queue(data_queue, item[PARAM['INPUT_LABEL']])
+                safely_add_data_to_queue(data_queue, item[PARAMS['INPUT_LABEL']])
 
         if data_queue.full():
             if is_stable_value(data_queue):
@@ -91,7 +91,7 @@ def module_main(received_data: any) -> [any, str]:
                     empty_queue(data_queue)
 
                     return_body = {
-                        PARAM['INPUT_LABEL']: last_stable_data,
+                        PARAMS['INPUT_LABEL']: last_stable_data,
                         f"{getenv('MODULE_NAME')}Time": time()
                     }
 
@@ -99,7 +99,7 @@ def module_main(received_data: any) -> [any, str]:
                 else:
                     data_queue.get()
 
-        return None, None
+        return None, "No data to send"
 
     except Exception as e:
         return None, f"Exception in the module business logic: {e}"
