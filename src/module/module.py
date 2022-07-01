@@ -99,7 +99,7 @@ def module_main(received_data: any) -> [any, str]:
                 else:
                     data_queue.get()
 
-        return None, "No data to send"
+        return None, None
 
     except Exception as e:
         return None, f"Exception in the module business logic: {e}"

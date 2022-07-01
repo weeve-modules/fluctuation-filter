@@ -1,83 +1,29 @@
-# Python Processing Module Boilerplate
+# Fluctuation Filter Module
 
 |              |                                                                  |
 | ------------ | ---------------------------------------------------------------- |
-| name         | Python Processing Module Boilerplate                             |
+| name         | Fluctuation Filter                                               |
 | version      | v2.0.0                                                           |
-| GitHub       | [python-processing-module-boilerplate](https://linktodockerhub/) |
-| authors      | Jakub Grzelak, Nithin Saai                                       |
+| GitHub       | [weevenetwork/fluctuation-filter](https://hub.docker.com/r/weevenetwork/fluctuation-filter) |
+| authors      | Mithila Ghuge, Paul Gaiduk                                          |
 
 ***
 ## Table of Content
 
-- [Python Processing Module Boilerplate](#python-processing-module-boilerplate)
+- [Fluctuation Filter Module](#fluctuation-filter-module)
   - [Table of Content](#table-of-content)
   - [Description](#description)
-  - [Directory Structure](#directory-structure)
-    - [File Tree](#file-tree)
   - [Module Variables](#module-variables)
-  - [As a module developer](#as-a-module-developer)
   - [Module Testing](#module-testing)
   - [Dependencies](#dependencies)
+  - [Input](#input)
+  - [Output](#output)
+    - [Example](#example)
 ***
 
 ## Description 
 
-This is a Python Processing Boilerplate module and it serves as a starting point for developers to build process modules for weeve platform and data services.
-Navigate to [As a module developer](#as-a-module-developer) to learn how to use this module. You can also explore our weeve documentation on [weeve Modules](https://docs.weeve.engineering/concepts/edge-applications/weeve-modules) and [module tutorials](https://docs.weeve.engineering/guides/how-to-create-a-weeve-module) to learn more details. 
-
-## Directory Structure
-
-Most important resources:
-
-| name              | description                                                                                            |
-| ----------------- | ------------------------------------------------------------------------------------------------------ |
-| src               | All source code related to the module (API and module code).                                           |
-| src/main.py       | Entry-point for the module.                                                                            |
-| src/api           | Code responsible for setting module's API and communication with weeve ecosystem.                      |
-| src/module        | Code related to the module's business logic. This is working directory for module developers.          |
-| docker            | All resources related to Docker (Dockerfile, docker-entrypoint.sh, docker-compose.yml).                |
-| test              | All resources related to automating testing of the module in development process.                      |
-| example.env       | Holds examples of environment variables for running the module.                                        |
-| requirements.txt  | A list of module dependencies.                                                                         |
-| Module.yaml       | Module's YAML file that is later used by weeve platform Data Service Designer                          |
-
-### File Tree
-
-```bash
-├── src
-│   ├── api
-│   │   ├── __init__.py
-│   │   ├── log.py # log configurations
-│   │   ├── processing_thread.py # a separate thread responsible for triggering data processing and sending to the next module
-│   │   ├── send_data.py # sends data to the next module
-│   │   └── request_handler.py # handles module's API and receives data from a previous module
-│   ├── module
-│   │   ├── main.py # [*] main logic for the module
-│   │   └── validator.py # [*] validation logic for incoming data
-│   └── main.py # module entrypoint
-├── docker
-│   ├── .dockerignore
-│   ├── docker-compose.yml
-│   ├── docker-entrypoint.sh
-│   └── Dockerfile
-├── test
-│   ├── assets
-│   │   ├── input.json # input data for tests (sample module input)
-│   │   └── expected_output.json # expected output data for tests (sample module output)
-│   ├── boilerplate_test.py # script handling module testing
-│   ├── docker-compose.test.yml
-│   ├── Dockerfile.listener # dockerfile for a container used to simulate egress endpoint
-│   ├── listener.py # script implementing egress endpoint
-│   └── test.env # environment variables for tests
-├── example.env # sample environment variables for the module
-├── Module.yaml # used by weeve platform to generate resource in Data Service Designer section
-├── makefile
-├── README.md
-├── example.README.md # README template for writing module documentation
-├── requirements_dev.txt # module dependencies for testing, used for building Docker image
-└── requirements.txt # module dependencies, used for building Docker image
-```
+This is a Python Fluctuation Filter module and it is used to eliminate unwanted spikes from input data and provide stable output. It will delay the change of the value filtering out specific amount (instances) of different, non-persisting value. 
 
 ## Module Variables
 
@@ -85,35 +31,15 @@ There are 5 module variables that are required by each module to correctly funct
 
 | Environment Variables | type   | Description                                       |
 | --------------------- | ------ | ------------------------------------------------- |
+| INPUT_LABEL           | string  | The input label on which anomaly is detected          |
+| WINDOW_SIZE           | integer | The stable instance count which need to be consider   |
+| SEND_ON_CHANGE        | boolean | Set true to Output data only when stable value changes|
 | MODULE_NAME           | string | Name of the module                                |
 | MODULE_TYPE           | string | Type of the module (Input, Processing, Output)    |
 | LOG_LEVEL             | string | Allowed log levels: DEBUG, INFO, WARNING, ERROR, CRITICAL. Refer to `logging` package documentation. |
 | INGRESS_HOST          | string | Host to which data will be received               |
 | INGRESS_PORT          | string | Port to which data will be received               |
 | EGRESS_URLS           | string | HTTP ReST endpoint for the next module            |
-
-## As a module developer
-
-RECOMMENDED:
-Make sure you have [virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)
-
-Install the dependencies with `make install_dev`
-
-A module developer needs to add all the configuration and business logic.
-
-All the module logic can be written in the module package in `src/module` directory.
-
-   * The files can me modified for the module
-      1. `module/validator.py`
-         * The function `data_validation` takes the JSON data received from the previous module.
-         * Incoming data can be validated here.
-         * Checks if data is of type permitted by a module (i.e. `dict` or `list`)>
-         * Checks if data contains required fields.
-         * Returns Error if data are not valid.
-      2. `module/module.py`
-         * The function `module_main` takes the JSON data received from the previous module.
-         * All the business logic about modules are written here.
-         * Returns processed data and error message.
 
 ## Module Testing
 
@@ -131,3 +57,53 @@ The following are developer dependencies:
 * pytest
 * flake8
 * black
+
+## Input
+
+Input to this module is JSON body single object or array of objects:
+
+Example:
+
+```json
+{
+  "temperature": 15
+}
+```
+
+```json
+[
+  {
+    "temperature": 15
+  },
+  {
+    "temperature": 21
+  },
+  {
+    "temperature": 25
+  }
+]
+```
+
+## Output
+Output of this module is JSON body:
+
+```json
+{
+    "<INPUT_LABEL>": <Processed data>,
+    "<MODULE_NAME>Time": timestamp
+}
+```
+
+### Example 
+
+```
+Input data : (23,23,24,24,24,22,21,21,21,23,24,25,25,25)
+Window_Size : 3
+Assume previous_stable_value = x
+
+If Send_on_change == True then 
+Expected Output : (24,21,25)
+
+If Send_on_change == False then
+Expected Output :(x,x,x,x,24,24,24,24,21,21,21,21,21,25)
+```

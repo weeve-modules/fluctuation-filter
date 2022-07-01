@@ -30,13 +30,14 @@ class ProcessingThread(Thread):
                 log.debug("Processed data : %s", processed_data)
 
                 # send data to the next module
-                send_error = send_data(processed_data)
+                if processed_data:
+                    send_error = send_data(processed_data)
 
-                if send_error:
-                    log.error(send_error)
-                    continue
+                    if send_error:
+                        log.error(send_error)
+                        continue
 
-                log.debug("Data sent.")
+                    log.debug("Data sent.")
 
             self.msg_received.clear()
 
