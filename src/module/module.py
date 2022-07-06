@@ -1,13 +1,20 @@
 """
-All logic related to the module's main application
-Mostly only this file requires changes
+This file implements module's main logic.
+Data processing should happen here.
+
+Edit this file to implement your module.
 """
 
-from app.config import APPLICATION
-#from app.weeve.egress import send_data
+from logging import getLogger
 from queue import Queue
+from time import time
+from os import getenv
+from .params import PARAMS
 
-data_queue = Queue(maxsize = APPLICATION['WINDOW_SIZE'])
+
+log = getLogger("module")
+
+data_queue = Queue(maxsize = PARAMS['WINDOW_SIZE'])
 last_stable_data = None
 
 def safely_add_data_to_queue(queue, data) -> None:
@@ -48,35 +55,51 @@ def can_send_data(data) -> bool:
     :param data: The data to be checked
     :return: True if the data should be sent, False otherwise
     """
-    return not APPLICATION['SEND_ON_CHANGE'] or (APPLICATION['SEND_ON_CHANGE'] and data != last_stable_data)
+    return not PARAMS['SEND_ON_CHANGE'] or (PARAMS['SEND_ON_CHANGE'] and data != last_stable_data)
 
 
-def module_main(received_data):
-    """implement module logic here
-    Args:
-        parsed_data ([JSON Object]): [Data received by the module and validated by data_validation function]
-    Returns:
-        [string, string]: [data, error]
+def module_main(received_data: any) -> [any, str]:
     """
+    Process received data by implementing module's main logic.
+    Function description should not be modified.
+
+    Args:
+        received_data (any): Data received by module and validated.
+
+    Returns:
+        any: Processed data that are ready to be sent to the next module or None if error occurs.
+        str: Error message if error occurred, otherwise None.
+
+    """
+
+    log.debug("Processing ...")
+
     global data_queue, last_stable_data
 
     try:
         if type(received_data) is dict:
             safely_add_data_to_queue(
-                data_queue, received_data[APPLICATION['INPUT_LABEL']])
+                data_queue, received_data[PARAMS['INPUT_LABEL']])
         elif type(received_data) is list:
             for item in received_data:
-                safely_add_data_to_queue(data_queue, item[APPLICATION['INPUT_LABEL']])
+                safely_add_data_to_queue(data_queue, item[PARAMS['INPUT_LABEL']])
 
         if data_queue.full():
             if is_stable_value(data_queue):
                 if (can_send_data(data_queue.queue[0])):
                     last_stable_data = data_queue.queue[0]
-                    empty_queue(data_queue)  
-                    return last_stable_data, None
+                    empty_queue(data_queue)
+
+                    return_body = {
+                        PARAMS['INPUT_LABEL']: last_stable_data,
+                        f"{getenv('MODULE_NAME')}Time": time()
+                    }
+
+                    return return_body, None
                 else:
                     data_queue.get()
 
         return None, None
+
     except Exception as e:
-        return None, str(e)
+        return None, f"Exception in the module business logic: {e}"
