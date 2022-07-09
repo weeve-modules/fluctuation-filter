@@ -4,7 +4,7 @@
 |              |                                                            |
 | ------------ | ---------------------------------------------------------- |
 | name         | Fluctuation Filter                                         |
-| version      | v0.0.2                                                     |
+| version      | v0.0.1                                                     |
 | docker image | [weevenetwork/fluctuation-filter](https://hub.docker.com/r/weevenetwork/fluctuation-filter) |
 | tags         | Python, Flask, Docker, Weeve                               |
 | authors      | Mithila Ghuge                                                |
