@@ -29,14 +29,18 @@ envs:                                   # Array of environment variables that wi
   - name: Send On Change
     key: SEND_ON_CHANGE
     description: Output data only when stable value changes.
-    value: True
+    value: 'True'
     type: 'select'
     options:
-      - True
-      - False
+      - 'True'
+      - 'False'
     dependencies: []                    # List of dependencies for the field. This field is only displayed if all the dependencies are met. If
-ports: []                                 # Array of ports that will be exposed by the module.
+ports: []
+envPorts: []
 mounts: []
+envMounts: []
+devices: []
+envDevices: []
 tags:                                   # Array of tags.
   - 'Python'
   - 'Processing'
