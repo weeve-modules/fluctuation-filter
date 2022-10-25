@@ -22,7 +22,7 @@ envs:                                   # Array of environment variables that wi
   - name: Window Size
     key: WINDOW_SIZE
     description: Number of stable data instances to consider
-    value: 3
+    value: '3'
     type: 'number'
     options: []                        # Options for the field if it is a select or multiple select. An array of string options
     dependencies: []                    # List of dependencies for the field. This field is only displayed if all the dependencies are met. If
