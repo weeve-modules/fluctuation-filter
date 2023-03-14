@@ -3,7 +3,7 @@
 |              |                                                                  |
 | ------------ | ---------------------------------------------------------------- |
 | name         | Fluctuation Filter                                               |
-| version      | v1.0.0                                                           |
+| version      | v1.0.1                                                           |
 | GitHub       | [weevenetwork/fluctuation-filter](https://hub.docker.com/r/weevenetwork/fluctuation-filter) |
 | authors      | Mithila Ghuge, Paul Gaiduk                                          |
 
