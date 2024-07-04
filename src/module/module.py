@@ -14,8 +14,9 @@ from .params import PARAMS
 
 log = getLogger("module")
 
-data_queue = Queue(maxsize = PARAMS['WINDOW_SIZE'])
+data_queue = Queue(maxsize=PARAMS['WINDOW_SIZE'])
 last_stable_data = None
+
 
 def safely_add_data_to_queue(queue, data) -> None:
     """
@@ -92,7 +93,8 @@ def module_main(received_data: any) -> [any, str]:
 
                     return_body = {
                         PARAMS['INPUT_LABEL']: last_stable_data,
-                        f"{getenv('MODULE_NAME')}Time": time()
+                        f"{getenv('MODULE_NAME')}Time": time(),
+                        **received_data
                     }
 
                     return return_body, None
